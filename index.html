@@ -1,281 +1,143 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>French Oral Practice - Leaving Certificate (OL)</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --primary: #002395; /* French Blue */
-      --primary-dark: #00165a;
-      --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
-      --bg: #f8fafc; --card-bg: #ffffff; --text-main: #1e293b;
-      --text-muted: #64748b; --radius: 12px;
-      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-    }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-main); margin: 0; padding: 20px; line-height: 1.6; }
-    .container { max-width: 1100px; margin: 0 auto; }
-    header { text-align: center; margin-bottom: 30px; padding: 25px; background: white; border-radius: var(--radius); box-shadow: var(--shadow); border-top: 5px solid var(--primary); }
-    h1 { margin: 0; font-weight: 800; color: var(--text-main); font-size: 1.8rem; }
-    .author-badge { display: inline-block; margin-top: 10px; font-size: 0.85rem; background: #eff6ff; padding: 5px 15px; border-radius: 20px; color: var(--primary-dark); font-weight: 600; }
-    .app-grid { display: grid; grid-template-columns: 350px 1fr; gap: 24px; }
-    @media (max-width: 900px) { .app-grid { grid-template-columns: 1fr; } }
-    .card { background: var(--card-bg); padding: 24px; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid #e2e8f0; height: fit-content; }
-    h2 { font-size: 1.1rem; margin-top: 0; display: flex; align-items: center; gap: 8px; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; }
-    .topics-container { display: grid; grid-template-columns: 1fr; gap: 10px; max-height: 600px; overflow-y: auto; padding-right: 5px; }
-    .topic-btn { background: white; border: 1px solid #e2e8f0; padding: 12px 15px; border-radius: 10px; cursor: pointer; transition: all 0.2s; text-align: left; display: flex; align-items: center; gap: 12px; width: 100%; }
-    .topic-btn:hover { border-color: var(--primary); background: #f0f7ff; }
-    .topic-btn.active { border-color: var(--primary); background: var(--primary); color: white; transform: translateX(5px); }
-    .topic-code { font-weight: 800; font-size: 0.8rem; background: #f1f5f9; padding: 4px 8px; border-radius: 6px; color: var(--primary-dark); }
-    .active .topic-code { background: rgba(255,255,255,0.2); color: white; }
-    .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin: 15px 0; }
-    button.main-btn { padding: 12px 20px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
-    button:disabled { opacity: 0.4; cursor: not-allowed; }
-    .btn-start { background: var(--success); color: white; }
-    .btn-stop { background: var(--danger); color: white; }
-    .btn-analyze { background: var(--primary); color: white; }
-    .btn-reset { background: #f1f5f9; color: var(--text-muted); }
-    textarea { width: 100%; border: 2px solid #f1f5f9; border-radius: 8px; padding: 15px; font-size: 1rem; font-family: inherit; box-sizing: border-box; resize: vertical; min-height: 120px; }
-    .checklist-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-radius: 10px; background: #f8fafc; margin-bottom: 8px; border: 1px solid #e2e8f0; }
-    .status-pill { font-size: 0.7rem; padding: 4px 10px; border-radius: 20px; font-weight: 800; }
-    .status-ok { background: #d1fae5; color: #065f46; }
-    .status-bad { background: #fee2e2; color: #991b1b; }
-    #summaryBox { padding: 20px; border-radius: var(--radius); margin-top: 20px; font-weight: 700; text-align: center; display: none; }
-    .pulse-mic { animation: pulse 1.5s infinite; background: var(--danger) !important; }
-    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
-  </style>
-</head>
-<body>
-
-<div class="container">
-  <header>
-    <h1>🇫🇷 French Oral Practice: Leaving Certificate (OL)</h1>
-    <div class="author-badge">David Martín Guerrero</div>
-  </header>
-
-  <div class="app-grid">
-    <aside class="card">
-      <h2>🎯 Exam Topics</h2>
-      <div class="topics-container" id="topicsGrid"></div>
-    </aside>
-
-    <main style="display: flex; flex-direction: column; gap: 24px;">
-      <section class="card">
-        <h2 id="displayTitle">Select a topic</h2>
-        <div id="displayPrompt" style="margin-bottom: 15px;">
-          <p style="color: var(--text-muted)">Please select a topic from the left to begin your practice.</p>
-        </div>
-        
-        <div class="btn-group">
-          <button id="btnStart" class="main-btn btn-start" onclick="startFlow()" disabled>▶️ Start</button>
-          <button id="btnStop" class="main-btn btn-stop" onclick="stopListening()" disabled>⏹️ Stop</button>
-          <button id="btnAnalyze" class="main-btn btn-analyze" onclick="analyzeNow()" disabled>🧠 Analyze</button>
-          <button class="main-btn btn-reset" onclick="resetAll()">🔄 Reset</button>
-        </div>
-        <p id="status" style="font-weight: 600; font-size: 0.9rem; color: var(--primary);"></p>
-      </section>
-
-      <section class="card">
-        <h2>📝 Your Answer & Transcription</h2>
-        <textarea id="transcript" placeholder="Your speech will appear here..."></textarea>
-        <div id="summaryBox"></div>
-        <div id="checklist" style="margin-top: 20px;"></div>
-      </section>
-    </main>
-  </div>
-</div>
-
-<script>
-/* ============================================================
-   CONSTANTS & VOCABULARY
-   ============================================================ */
-const MONTHS = /(janvier|fevrier|mars|avril|mai|juin|juillet|aout|septembre|octobre|novembre|decembre)/u;
-const FAMILY_VOCAB = ["mere","pere","maman","papa","frere","soeur","grand-pere","grand-mere","oncle","tante","cousin","cousine","fils","fille","beau-pere","belle-mere"];
-const HOBBIES = ["lire","musique","danser","chanter","dessiner","jouer","jeux video","foot","basket","natation","courir","marcher","shopping","series","cinema","cuisiner","voyager","guitare"];
-const TOWN_FACILITIES = ["parc","centre sportif","piscine","cinema","centre commercial","supermarche","magasins","bibliotheque","gare","hopital","pharmacie","ecole","college","restaurants","cafes","plage"];
-const SCHOOL_FACILITIES = ["gymnase","bibliotheque","laboratoire","cantine","cafeteria","terrains","cour","salle d'informatique","refectoire","musique"];
-
 const TOPICS = {
   about_me: {
-    code: "1", title: "About Me",
-    question_fr: "Parle-moi de toi: 1) Nom 2) Âge 3) Anniversaire 4) Origine.",
-    question_en: "Talk about yourself: 1) Name 2) Age 3) Birthday 4) Origin.",
+    code: "1", title: "Moi-même / About Me",
+    question_fr: "Parle-moi de toi: Nom, âge, anniversaire et origine.",
+    question_en: "Talk about yourself: Name, age, birthday and origin.",
     speak: "Parle-moi de toi-même.",
     criteria: [
-      { id:"nom", label:"Name", required:true, patterns:[/m'appelle/u, /nom est/u], hint:"Je m'appelle..." },
-      { id:"age", label:"Age", required:true, patterns:[/j'ai\s+\d+/u, "ans"], hint:"J'ai dix-sept ans." },
-      { id:"anniv", label:"Birthday", required:true, patterns:["mon anniversaire est", MONTHS], hint:"Date and month." },
-      { id:"origine", label:"Origin", required:true, patterns:[ /habite a/u, /viens de/u, "irlande"], hint:"J'habite à..." }
+      { id:"nom", label:"Name", patterns:[/m'appelle/u, /nom est/u], hint:"Je m'appelle..." },
+      { id:"age", label:"Age", patterns:[/j'ai\s+\d+/u, "ans"], hint:"J'ai dix-sept ans." },
+      { id:"anniv", label:"Birthday", patterns:["mon anniversaire est", MONTHS], hint:"Date and month." },
+      { id:"origine", label:"Origin", patterns:[ /habite a/u, /viens de/u, "irlande"], hint:"J'habite à..." }
     ]
   },
   famille: {
-    code: "2", title: "Family",
+    code: "2", title: "La Famille / Family",
     question_fr: "Combien de personnes il y a dans ta famille ? Tu t'entends bien avec eux ?",
     question_en: "How many in your family? Do you get on well with them?",
     speak: "Parle-moi de ta famille.",
     criteria: [
-      { id:"sommes", label:"Members", required:true, patterns:[/sommes/u, /il y a/u, "personnes"], hint:"Nous sommes cinq." },
-      { id:"noms", label:"Who they are", required:true, patterns:FAMILY_VOCAB, hint:"Mention parents/siblings." },
-      { id:"entente", label:"Relationship", required:true, patterns:[ /m'entends bien/u, /m'entends mal/u, "sympa"], hint:"Je m'entends bien avec..." }
+      { id:"sommes", label:"Members", patterns:[/sommes/u, /il y a/u, "personnes"], hint:"Nous sommes cinq." },
+      { id:"noms", label:"Who they are", patterns:FAMILY_VOCAB, hint:"Mention parents/siblings." },
+      { id:"entente", label:"Relationship", patterns:[ /m'entends bien/u, /m'entends mal/u, "sympa"], hint:"Je m'entends bien avec..." }
+    ]
+  },
+  maison: {
+    code: "3", title: "La Maison / House",
+    question_fr: "Décris ta maison et ta pièce préférée.",
+    question_en: "Describe your house and your favorite room.",
+    speak: "Décris ta maison.",
+    criteria: [
+      { id:"type", label:"Type", patterns:["maison","appartement","individuelle","jardin"], hint:"C'est une grande maison." },
+      { id:"chambre", label:"My room", patterns:["ma chambre","lit","bureau","ordinateur"], hint:"Dans ma chambre il y a..." }
+    ]
+  },
+  quartier: {
+    code: "4", title: "Mon Quartier / My Area",
+    question_fr: "Où habites-tu exactement ? Qu'est-ce qu'il y a pour les jeunes ?",
+    question_en: "Where exactly do you live? What is there for young people?",
+    speak: "Où habites-tu ?",
+    criteria: [
+      { id:"lieu", label:"Location", patterns:[ /habite a/u, "ville", "campagne", "banlieue"], hint:"J'habite en banlieue." },
+      { id:"inst", label:"Facilities", patterns:TOWN_FACILITIES, hint:"Il y a un parc, un ciné..." }
     ]
   },
   ecole: {
-    code: "3", title: "School",
-    question_fr: "Décris ton école. Quelle est ta matière préférée ?",
-    question_en: "Describe your school. What is your favorite subject?",
+    code: "5", title: "L'École / School",
+    question_fr: "Décris ton école et tes matières préférées.",
+    question_en: "Describe your school and your favorite subjects.",
     speak: "Parle-moi de ton école.",
     criteria: [
-      { id:"desc", label:"Description", required:true, patterns:["grande","mixte","moderne","ecole"], hint:"C'est une grande école." },
-      { id:"matieres", label:"Subjects", required:true, patterns:["prefere","matiere","francais","anglais","maths"], hint:"Ma matière préférée est..." },
-      { id:"uniforme", label:"Uniform", required:true, patterns:["uniforme","porte","obligatoire"], hint:"Je porte un uniforme." }
+      { id:"desc", label:"Description", patterns:["grande","mixte","moderne","ecole"], hint:"C'est une grande école." },
+      { id:"matieres", label:"Subjects", patterns:["prefere","matiere","francais","anglais","maths"], hint:"Ma matière préférée est..." }
+    ]
+  },
+  professeurs: {
+    code: "6", title: "Les Profs / Teachers",
+    question_fr: "Comment sont les professeurs en général ?",
+    question_en: "What are the teachers like in general?",
+    speak: "Comment sont les professeurs ?",
+    criteria: [
+      { id:"carac", label:"Character", patterns:["stricts","sympas","bons","aident"], hint:"Ils sont sympas." },
+      { id:"pref", label:"Favorite", patterns:[/prof prefere/u, /professeur prefere/u], hint:"Mon prof préféré est..." }
+    ]
+  },
+  routine: {
+    code: "7", title: "Ma Routine / My Routine",
+    question_fr: "À quelle heure tu te lèves ? Qu'est-ce que tu fais le matin ?",
+    question_en: "What time do you get up? What do you do in the morning?",
+    speak: "Parle-moi de ta routine quotidienne.",
+    criteria: [
+      { id:"heure", label:"Time", patterns:[ /me leve/u, /a sept heures/u, /a huit heures/u], hint:"Je me lève à 7h." },
+      { id:"petitdej", label:"Breakfast", patterns:["petit dejeuner", "mange", "cereales", "toast"], hint:"Je mange des céréales." }
     ]
   },
   loisirs: {
-    code: "4", title: "Hobbies",
+    code: "8", title: "Loisirs / Hobbies",
     question_fr: "Qu'est-ce que tu fais pendant ton temps libre ?",
     question_en: "What do you do in your free time?",
     speak: "Qu'est-ce que tu fais pendant ton temps libre ?",
     criteria: [
-      { id:"hobbies", label:"Activities", required:true, patterns:HOBBIES, hint:"Mention at least 2 hobbies." },
-      { id:"weekend", label:"Weekend", required:true, patterns:["weekend","samedi","dimanche"], hint:"Le weekend, je..." }
+      { id:"hobbies", label:"Activities", patterns:HOBBIES, hint:"Mention at least 2 hobbies." },
+      { id:"temps", label:"Frequency", patterns:["chaque jour","le weekend","apres l'ecole"], hint:"Le weekend, je..." }
+    ]
+  },
+  sante: {
+    code: "9", title: "La Santé / Health",
+    question_fr: "Est-ce que tu manges sainement ? Tu fais du sport ?",
+    question_en: "Do you eat healthily? Do you do sports?",
+    speak: "Est-ce que tu manges sainement ?",
+    criteria: [
+      { id:"manger", label:"Food", patterns:["sainement","legumes","fruits","fast-food"], hint:"Je mange des fruits." },
+      { id:"sport", label:"Sport", patterns:["sport","foot","forme","exercice"], hint:"Je joue au foot." }
     ]
   },
   petit_boulot: {
-    code: "5", title: "Part-time Job",
+    code: "10", title: "Petit Boulot / Job",
     question_fr: "Tu as un petit boulot ? Qu'est-ce que tu fais avec l'argent ?",
     question_en: "Do you have a part-time job? What do you do with the money?",
     speak: "Est-ce que tu as un petit boulot ?",
     criteria: [
-      { id:"travail", label:"Job", required:true, patterns:["travaille","job","boulot","babysitting","magasin"], hint:"Je travaille dans un..." },
-      { id:"argent", label:"Money", required:true, patterns:["argent","achete","economise"], hint:"J'achète des vêtements." }
+      { id:"travail", label:"Job", patterns:["travaille","job","boulot","babysitting","magasin"], hint:"Je travaille dans un..." },
+      { id:"argent", label:"Money", patterns:["argent","achete","economise"], hint:"J'achète des vêtements." }
+    ]
+  },
+  vacances: {
+    code: "11", title: "Vacances / Holidays",
+    question_fr: "Où vas-tu normalement en vacances ? Tu préfères la plage ?",
+    question_en: "Where do you usually go on holiday? Do you prefer the beach?",
+    speak: "Où vas-tu normalement en vacances ?",
+    criteria: [
+      { id:"lieu", label:"Destination", patterns:["espagne","france","etranger","bord de la mer"], hint:"Je vais en Espagne." },
+      { id:"pref", label:"Preference", patterns:["prefere","plage","soleil","visiter"], hint:"Je préfère la plage." }
     ]
   },
   dernier_weekend: {
-    code: "6", title: "Last Weekend",
-    question_fr: "Qu'est-ce que tu as fait le weekend dernier ? (Utilise le PASSÉ)",
+    code: "12", title: "Weekend Dernier / Last Weekend",
+    question_fr: "Qu'est-ce que tu as fait le weekend dernier ? (Usa PASADO)",
     question_en: "What did you do last weekend? (Use PAST tense)",
     speak: "Qu'est-ce que tu as fait le weekend dernier ?",
     criteria: [
-      { id:"passe", label:"Past Tense", required:true, patterns:["suis alle","ai regarde","ai fait","ai joue","ai mange"], hint:"Use 'J'ai...' or 'Je suis...'" }
+      { id:"passe", label:"Past Tense", patterns:["suis alle","ai regarde","ai fait","ai joue","ai mange"], hint:"Use 'J'ai...' or 'Je suis...'" }
     ]
   },
   avenir: {
-    code: "7", title: "Future Plans",
+    code: "13", title: "L'Avenir / Future Plans",
     question_fr: "Qu'est-ce que tu vas faire l'année prochaine ?",
     question_en: "What are you going to do next year?",
     speak: "Quels sont tes projets pour l'avenir ?",
     criteria: [
-      { id:"plans", label:"Future", required:true, patterns:["universite","fac","etudier","travailler","annee sabbatique"], hint:"Je veux aller à la fac." }
+      { id:"plans", label:"Future", patterns:["universite","fac","etudier","travailler","annee sabbatique"], hint:"Je veux aller à la fac." }
+    ]
+  },
+  technologie: {
+    code: "14", title: "Technologie / Technology",
+    question_fr: "Est-ce que tu utilises beaucoup ton portable ?",
+    question_en: "Do you use your phone a lot?",
+    speak: "Est-ce que tu utilises souvent les réseaux sociaux ?",
+    criteria: [
+      { id:"mobile", label:"Phone", patterns:["portable","telephone","ecran","temps"], hint:"J'utilise mon portable." },
+      { id:"app", label:"Apps", patterns:["instagram","tiktok","snapchat","reseaux sociaux"], hint:"J'adore TikTok." }
     ]
   }
 };
-
-/* ============================================================
-   APP ENGINE
-   ============================================================ */
-let currentKey = null;
-const recognition = (window.SpeechRecognition || window.webkitSpeechRecognition) ? new (window.SpeechRecognition || window.webkitSpeechRecognition)() : null;
-
-function renderTopics() {
-  const grid = document.getElementById("topicsGrid");
-  grid.innerHTML = "";
-  Object.entries(TOPICS).forEach(([key, t]) => {
-    const btn = document.createElement("button");
-    btn.className = "topic-btn";
-    btn.onclick = () => selectTopic(key, btn);
-    btn.innerHTML = `<span class="topic-code">${t.code}</span><span style="font-weight:600">${t.title}</span>`;
-    grid.appendChild(btn);
-  });
-}
-
-function selectTopic(key, btn) {
-  currentKey = key;
-  document.querySelectorAll('.topic-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  const t = TOPICS[key];
-  document.getElementById("displayTitle").textContent = t.title;
-  document.getElementById("displayPrompt").innerHTML = `
-    <p style="margin:0 0 5px 0"><strong>FR:</strong> ${t.question_fr}</p>
-    <p style="margin:0; color:var(--text-muted)"><strong>EN:</strong> ${t.question_en}</p>
-  `;
-  document.getElementById("btnStart").disabled = false;
-  document.getElementById("btnAnalyze").disabled = false;
-  document.getElementById("checklist").innerHTML = "";
-  document.getElementById("summaryBox").style.display = "none";
-  setStatus("Topic ready!");
-}
-
-async function startFlow() {
-  const t = TOPICS[currentKey];
-  setStatus("🔊 Playing question...");
-  const ut = new SpeechSynthesisUtterance(t.speak);
-  ut.lang = "fr-FR";
-  ut.onend = () => {
-    if (recognition) {
-      recognition.lang = "fr-FR";
-      recognition.start();
-      document.getElementById("btnStop").disabled = false;
-      document.getElementById("btnStop").classList.add("pulse-mic");
-      setStatus("🎤 SPEAK NOW!");
-    }
-  };
-  window.speechSynthesis.speak(ut);
-}
-
-function stopListening() {
-  if (recognition) recognition.stop();
-  document.getElementById("btnStop").disabled = true;
-  document.getElementById("btnStop").classList.remove("pulse-mic");
-  setStatus("Speech captured.");
-}
-
-if(recognition) {
-  recognition.onresult = (e) => {
-    document.getElementById("transcript").value = e.results[0][0].transcript;
-    stopListening();
-    analyzeNow();
-  };
-}
-
-function normalize(s) {
-  return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-}
-
-function analyzeNow() {
-  const t = TOPICS[currentKey];
-  const textRaw = document.getElementById("transcript").value;
-  const text = normalize(textRaw);
-  const checklist = document.getElementById("checklist");
-  checklist.innerHTML = "";
-  let score = 0;
-
-  t.criteria.forEach(c => {
-    const ok = c.patterns.some(p => {
-        if (p instanceof RegExp) return p.test(textRaw.toLowerCase());
-        return text.includes(normalize(p));
-    });
-    if (ok) score++;
-    const div = document.createElement("div");
-    div.className = "checklist-item";
-    div.innerHTML = `
-      <div><div style="font-weight:700">${c.label}</div><div style="font-size:0.8rem; color:var(--text-muted)">${ok ? '✅ Good!' : '❌ Missing: ' + c.hint}</div></div>
-      <span class="status-pill ${ok ? 'status-ok' : 'status-bad'}">${ok ? 'OK' : 'MISSING'}</span>
-    `;
-    checklist.appendChild(div);
-  });
-
-  const summary = document.getElementById("summaryBox");
-  summary.style.display = "block";
-  const ratio = score / t.criteria.length;
-  summary.style.background = ratio === 1 ? "#d1fae5" : ratio >= 0.5 ? "#fef3c7" : "#fee2e2";
-  summary.style.color = ratio === 1 ? "#065f46" : ratio >= 0.5 ? "#92400e" : "#991b1b";
-  summary.innerHTML = ratio === 1 ? "Excellent! You covered all points." : "Good try! Add the missing information.";
-}
-
-function resetAll() { location.reload(); }
-function setStatus(msg) { document.getElementById("status").textContent = msg; }
-window.onload = renderTopics;
-</script>
-</body>
-</html>
